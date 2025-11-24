@@ -43,7 +43,15 @@ function processData(fileContents) {
             var fields = line.split(',');
 
             // Extraer los campos relevantes del archivo CSV
-            var passengerName = fields[13];
+            // Normalizar nombre del pasajero a mayúsculas en el momento de la asignación
+            // El CSV puede tener nombre y apellido en la misma celda o en celdas separadas
+            // Combina fields[13] y fields[14] cuando tenga sentido (evitando duplicar si field[14] es un email o vacío)
+            var namePart = (fields[13] || '').trim();
+            var surnamePart = (fields[14] || '').trim();
+            // Evitar tomar el campo 14 si parece un email u otro valor no-apellido
+            var includeSurname = surnamePart !== '' && !surnamePart.includes('@') && !/\d/.test(surnamePart);
+            var passengerNameRaw = includeSurname ? (namePart + ' ' + surnamePart) : namePart;
+            var passengerName = (passengerNameRaw || '').toUpperCase();
             var services = fields[16];
             var dni = fields[12];
             var hotel = fields[1];
